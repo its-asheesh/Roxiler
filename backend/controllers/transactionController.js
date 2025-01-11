@@ -3,15 +3,16 @@ const Transaction = require('../models/Transaction');
 const moment = require('moment'); // Optional but helpful for date management
 
 // Helper: Get start and end dates for a month
-const getMonthRange = (month, year = 2022) => { // Default to 2022
+const getMonthRange = (month, year = 2022) => {
   const startOfMonth = moment(`${year}-${month}-01`).startOf('month').toDate();
   const endOfMonth = moment(`${year}-${month}-01`).endOf('month').toDate();
-
+  
   console.log('Start of Month:', startOfMonth); // Log to verify
   console.log('End of Month:', endOfMonth); // Log to verify
 
   return { startOfMonth, endOfMonth };
 };
+
 
 // Fetch and seed data
 const fetchAndSeedData = async (req, res) => {
@@ -40,113 +41,105 @@ const fetchAndSeedData = async (req, res) => {
 const listTransactions = async (req, res) => {
   const { month, search = '', page = 1, perPage = 10 } = req.query;
 
-  // Check if month is valid
   if (!month || isNaN(month) || month < 1 || month > 12) {
     return res.status(400).json({ error: 'Invalid or missing month parameter' });
   }
 
-  // Construct the date range for the given month
   const { startOfMonth, endOfMonth } = getMonthRange(month);
 
-  // Log the start and end date for debugging purposes
-  console.log('Start Date:', startOfMonth);
-  console.log('End Date:', endOfMonth);
+  const query = {
+    dateOfSale: { $gte: startOfMonth, $lte: endOfMonth },
+  };
 
-  // Construct the search regex pattern if needed
-  const regex = search ? new RegExp(search, 'i') : null;
+  if (search) {
+    const regex = new RegExp(search, 'i'); // For string fields
+    const parsedPrice = parseFloat(search); // Attempt to parse numeric value
+
+    query.$or = [
+      { title: regex },
+      { description: regex },
+      ...(isNaN(parsedPrice) ? [] : [{ price: parsedPrice }]), // Only include price if search is a number
+    ];
+  }
 
   try {
-    // Build the query dynamically based on whether there's a search term
-    const query = {
-      dateOfSale: { $gte: startOfMonth, $lte: endOfMonth }
-    };
-
-    if (regex) {
-      query.$or = [
-        { title: regex },
-        { description: regex }
-      ];
-    }
-
-    // Fetch transactions based on the query, pagination, and limits
     const transactions = await Transaction.find(query)
       .skip((page - 1) * perPage)
       .limit(perPage);
 
-    // Log the transactions returned for debugging purposes
-    console.log('Transactions found:', transactions);
-
-    // Check if any transactions are found
     if (transactions.length === 0) {
-      return res.status(404).json({ message: 'No transactions found matching the search term' });
+      return res.status(404).json({ message: 'No transactions found' });
     }
 
-    // Return the fetched transactions
     res.status(200).json(transactions);
   } catch (error) {
-    // Handle any errors that occur during the query
-    console.error('Error fetching transactions:', error.message);
     res.status(500).json({ error: 'Error fetching transactions', details: error.message });
   }
 };
 
 
+
 // Get statistics
-const getStatistics = async (month, year = 2021) => {
+const getStatistics = async (req, res) => {
+  const { month, year = 2022 } = req.query;
+
+  if (!month || isNaN(month) || month < 1 || month > 12) {
+    return res.status(400).json({ error: 'Invalid or missing month parameter' });
+  }
+
   const { startOfMonth, endOfMonth } = getMonthRange(month, year);
 
   try {
     const stats = await Transaction.aggregate([
-      { 
-        $match: { 
-          dateOfSale: { $gte: startOfMonth, $lte: endOfMonth } 
-        } 
+      {
+        $match: {
+          dateOfSale: { $gte: startOfMonth, $lte: endOfMonth },
+        },
       },
-      { 
+      {
         $facet: {
           totalSaleAmount: [
-            { 
-              $group: { 
-                _id: null, 
-                total: { $sum: '$price' } 
-              } 
-            }
+            {
+              $group: {
+                _id: null,
+                total: { $sum: '$price' },
+              },
+            },
           ],
           soldItems: [
-            { 
-              $match: { isSold: true } 
+            {
+              $match: { isSold: true },
             },
-            { 
-              $count: 'count' 
-            }
+            {
+              $count: 'count',
+            },
           ],
           notSoldItems: [
-            { 
-              $match: { isSold: false } 
+            {
+              $match: { isSold: false },
             },
-            { 
-              $count: 'count' 
-            }
-          ]
-        }
-      }
+            {
+              $count: 'count',
+            },
+          ],
+        },
+      },
     ]);
 
-    // Extract the data from the facet
     const totalSaleAmount = stats[0].totalSaleAmount.length ? stats[0].totalSaleAmount[0].total : 0;
     const totalSoldItems = stats[0].soldItems.length ? stats[0].soldItems[0].count : 0;
     const totalNotSoldItems = stats[0].notSoldItems.length ? stats[0].notSoldItems[0].count : 0;
 
-    return {
+    res.status(200).json({
       totalSaleAmount,
       totalSoldItems,
       totalNotSoldItems,
-    };
+    });
   } catch (error) {
-    console.error('Error fetching statistics:', error.message);
-    throw new Error('Error fetching statistics: ' + error.message);
+    res.status(500).json({ error: 'Error fetching statistics', details: error.message });
   }
 };
+
 
 
 

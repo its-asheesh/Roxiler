@@ -6,15 +6,16 @@ const TransactionsTable = ({ selectedMonth }) => {
   const [transactions, setTransactions] = useState([]);
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
+  const [perPage, setPerPage] = useState(10); // Number of items per page
 
   useEffect(() => {
     axios
       .get(`http://localhost:5000/api/transactions/list`, {
-        params: { month: selectedMonth, search, page, perPage: 10 },
+        params: { month: selectedMonth, search, page, perPage },
       })
       .then((res) => setTransactions(res.data))
       .catch((err) => console.error('Error fetching transactions:', err));
-  }, [selectedMonth, search, page]);
+  }, [selectedMonth, search, page, perPage]);
 
   return (
     <section className="transactions-table-container">
@@ -27,6 +28,12 @@ const TransactionsTable = ({ selectedMonth }) => {
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
+        <button
+          className="search-button"
+          onClick={() => setPage(1)} // Reset to first page when search is triggered
+        >
+          Search
+        </button>
       </div>
       <div className="table-container">
         <table className="transactions-table">
@@ -56,12 +63,14 @@ const TransactionsTable = ({ selectedMonth }) => {
         <button
           className="pagination-button"
           onClick={() => setPage((prev) => Math.max(prev - 1, 1))}
+          disabled={page === 1}
         >
           Previous
         </button>
         <button
           className="pagination-button"
           onClick={() => setPage((prev) => prev + 1)}
+          disabled={transactions.length < perPage}
         >
           Next
         </button>

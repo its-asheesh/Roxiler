@@ -1,44 +1,75 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import { CircularProgress, Box, Typography } from '@mui/material';
 
-const Statistics = ({ month, year }) => {
+const Statistics = ({ selectedMonth, selectedYear }) => {
   const [statistics, setStatistics] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    setLoading(true);
-    setError(null);
+    const fetchStatistics = async () => {
+      setLoading(true);
+      setError(null);
 
-    axios
-      .get(`http://localhost:5000/api/transactions/statistics`, {
-        params: { month, year }
-      })
-      .then((response) => {
-        setStatistics(response.data);
+      try {
+        const response = await axios.get(`http://localhost:5000/api/transactions/statistics`, {
+          params: { month: selectedMonth, year: selectedYear },
+        });
+
+        if (
+          response.data &&
+          typeof response.data.totalSaleAmount === 'number' &&
+          typeof response.data.totalSoldItems === 'number' &&
+          typeof response.data.totalNotSoldItems === 'number'
+        ) {
+          setStatistics(response.data);
+        } else {
+          setError('Invalid response format');
+        }
+      } catch (err) {
+        console.error('Error fetching statistics:', err);
+        setError(`Failed to load statistics: ${err.message}`);
+      } finally {
         setLoading(false);
-      })
-      .catch((err) => {
-        setError('Failed to load statistics');
-        setLoading(false);
-      });
-  }, [month, year]);
+      }
+    };
 
-  if (loading) {
-    return <p>Loading...</p>;
-  }
-
-  if (error) {
-    return <p>{error}</p>;
-  }
+    fetchStatistics();
+  }, [selectedMonth, selectedYear]);
 
   return (
-    <div>
-      <h3>Statistics for {month}/{year}</h3>
-      <p>Total Sale Amount: ${statistics.totalSaleAmount}</p>
-      <p>Total Sold Items: {statistics.totalSoldItems}</p>
-      <p>Total Not Sold Items: {statistics.totalNotSoldItems}</p>
-    </div>
+    <Box sx={{ padding: 3, maxWidth: '900px', margin: '0 auto' }}>
+      <Typography variant="h4" sx={{ marginBottom: 2, textAlign: 'center' }}>
+        Statistics for {selectedMonth}/{selectedYear}
+      </Typography>
+
+      {loading && (
+        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+          <CircularProgress />
+        </Box>
+      )}
+
+      {error && !loading && (
+        <Typography variant="h6" sx={{ color: 'red', textAlign: 'center' }}>
+          {error}
+        </Typography>
+      )}
+
+      {statistics && !loading && !error && (
+        <Box sx={{ marginTop: 3 }}>
+          <Typography variant="h6">
+            <strong>Total Sale Amount:</strong> ${statistics.totalSaleAmount.toFixed(2)}
+          </Typography>
+          <Typography variant="h6">
+            <strong>Total Sold Items:</strong> {statistics.totalSoldItems}
+          </Typography>
+          <Typography variant="h6">
+            <strong>Total Not Sold Items:</strong> {statistics.totalNotSoldItems}
+          </Typography>
+        </Box>
+      )}
+    </Box>
   );
 };
 
