@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { CircularProgress, Box, Typography } from '@mui/material';
+import './Statistics.css'; // Add a separate CSS file for styling
 
 const Statistics = ({ selectedMonth, selectedYear }) => {
   const [statistics, setStatistics] = useState(null);
@@ -39,37 +39,32 @@ const Statistics = ({ selectedMonth, selectedYear }) => {
   }, [selectedMonth, selectedYear]);
 
   return (
-    <Box sx={{ padding: 3, maxWidth: '900px', margin: '0 auto' }}>
-      <Typography variant="h4" sx={{ marginBottom: 2, textAlign: 'center' }}>
-        Statistics for {selectedMonth}/{selectedYear}
-      </Typography>
+    <div className="statistics-container">
+      <h1 className="statistics-title">
+        Statistics - {selectedMonth} <span className="month-text">(Selected month name from dropdown)</span>
+      </h1>
 
-      {loading && (
-        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-          <CircularProgress />
-        </Box>
-      )}
+      {loading && <div className="loading">Loading...</div>}
 
-      {error && !loading && (
-        <Typography variant="h6" sx={{ color: 'red', textAlign: 'center' }}>
-          {error}
-        </Typography>
-      )}
+      {error && !loading && <div className="error">{error}</div>}
 
       {statistics && !loading && !error && (
-        <Box sx={{ marginTop: 3 }}>
-          <Typography variant="h6">
-            <strong>Total Sale Amount:</strong> ${statistics.totalSaleAmount.toFixed(2)}
-          </Typography>
-          <Typography variant="h6">
-            <strong>Total Sold Items:</strong> {statistics.totalSoldItems}
-          </Typography>
-          <Typography variant="h6">
-            <strong>Total Not Sold Items:</strong> {statistics.totalNotSoldItems}
-          </Typography>
-        </Box>
+        <div className="statistics-card">
+          <div className="stat-row">
+            <span>Total Sale</span>
+            <span>{statistics.totalSaleAmount}</span>
+          </div>
+          <div className="stat-row">
+            <span>Total Sold Item</span>
+            <span>{statistics.totalSoldItems}</span>
+          </div>
+          <div className="stat-row">
+            <span>Total Not Sold Item</span>
+            <span>{statistics.totalNotSoldItems}</span>
+          </div>
+        </div>
       )}
-    </Box>
+    </div>
   );
 };
 

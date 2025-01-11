@@ -1,5 +1,5 @@
-// src/App.jsx
 import React, { useState } from 'react';
+import './App.css'; // Import the CSS file
 import TransactionsTable from './components/TransactionsTable';
 import Statistics from './components/Statistics';
 import BarChart from './components/BarChart';
@@ -21,8 +21,8 @@ const App = () => {
         </select>
       </header>
       <main>
-        <Statistics selectedMonth={selectedMonth} />
         <TransactionsTable selectedMonth={selectedMonth} />
+        <Statistics selectedMonth={selectedMonth} />
         <BarChart selectedMonth={selectedMonth} />
         <PieChart selectedMonth={selectedMonth} />
       </main>

@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import './TransactionsTable.css'; // Assuming you'll create a CSS file for styling
+import './TransactionsTable.css';
 
 const TransactionsTable = ({ selectedMonth }) => {
   const [transactions, setTransactions] = useState([]);
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
-  const [perPage, setPerPage] = useState(10); // Number of items per page
+  const [perPage, setPerPage] = useState(10);
+  const [isSearchVisible, setIsSearchVisible] = useState(false);
 
   useEffect(() => {
     axios
@@ -17,49 +18,92 @@ const TransactionsTable = ({ selectedMonth }) => {
       .catch((err) => console.error('Error fetching transactions:', err));
   }, [selectedMonth, search, page, perPage]);
 
+  const handleSearch = () => {
+    setIsSearchVisible(true); // Show the search input field
+  };
+
+  const handleSearchSubmit = (e) => {
+    e.preventDefault();
+    setPage(1); // Reset to the first page when a new search is initiated
+  };
+
   return (
-    <section className="transactions-table-container">
-      <h2 className="title">Transactions</h2>
-      <div className="search-container">
-        <input
-          type="text"
-          className="search-input"
-          placeholder="Search transactions"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-        />
-        <button
-          className="search-button"
-          onClick={() => setPage(1)} // Reset to first page when search is triggered
-        >
-          Search
+    <section className="transactions-dashboard">
+      <h2 className="dashboard-title"></h2>
+
+      <div className="filters-container">
+        {/* Search Transaction */}
+        <button className="search-transaction" onClick={handleSearch}>
+          Search transaction
         </button>
+        {isSearchVisible && (
+          <form onSubmit={handleSearchSubmit} className="search-form">
+            <input
+              type="text"
+              placeholder="Search by title, category..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="search-input"
+            />
+            <button type="submit" className="search-submit">
+              Search
+            </button>
+          </form>
+        )}
+
+        {/* Select Month Dropdown */}
+        <div className="select-month">
+          <button className="select-month-button">
+            {`Month: ${selectedMonth}`}
+          </button>
+          <span className="dropdown-icon">▼</span>
+        </div>
       </div>
+
+      {/* Transactions Table */}
       <div className="table-container">
         <table className="transactions-table">
           <thead>
             <tr>
+              <th>ID</th>
               <th>Title</th>
               <th>Description</th>
               <th>Price</th>
-              <th>Date</th>
-              <th>Status</th>
+              <th>Category</th>
+              <th>Sold</th>
+              <th>Image</th>
             </tr>
           </thead>
           <tbody>
-            {transactions.map((transaction) => (
-              <tr key={transaction._id}>
-                <td>{transaction.title}</td>
-                <td>{transaction.description}</td>
-                <td>${transaction.price}</td>
-                <td>{transaction.dateOfSale}</td>
-                <td>{transaction.isSold ? 'Sold' : 'Not Sold'}</td>
-              </tr>
-            ))}
+          {transactions.map((transaction) => {
+  console.log(transaction.image); // Debug image URL
+  return (
+    <tr key={transaction._id}>
+      <td>{transaction._id}</td>
+      <td>{transaction.title}</td>
+      <td>{transaction.description}</td>
+      <td>${transaction.price}</td>
+      <td>{transaction.category}</td>
+      <td>{transaction.isSold ? 'Yes' : 'No'}</td>
+      <td>
+        <img
+          src={transaction.image}
+          alt="transaction"
+          className="transaction-image"
+          onError={(e) => (e.target.src = '/path/to/placeholder.png')} // Fallback if the image fails to load
+        />
+      </td>
+    </tr>
+  );
+})}
+
           </tbody>
         </table>
       </div>
+
+      {/* Pagination */}
       <div className="pagination-container">
+        <span>Page No: {page}</span>
         <button
           className="pagination-button"
           onClick={() => setPage((prev) => Math.max(prev - 1, 1))}
@@ -74,6 +118,7 @@ const TransactionsTable = ({ selectedMonth }) => {
         >
           Next
         </button>
+        <span>Per Page: {perPage}</span>
       </div>
     </section>
   );

@@ -1,0 +1,54 @@
+.statistics-container {
+    font-family: Arial, sans-serif;
+    text-align: center;
+    background-color: #f4f9fa;
+    padding: 20px;
+    border-radius: 10px;
+  }
+  
+  .statistics-title {
+    font-size: 28px;
+    font-weight: bold;
+    margin-bottom: 20px;
+    color: #333;
+  }
+  
+  .month-text {
+    font-size: 14px;
+    font-weight: normal;
+    color: #777;
+  }
+  
+  .loading {
+    font-size: 18px;
+    color: #555;
+  }
+  
+  .error {
+    font-size: 18px;
+    color: red;
+  }
+  
+  .statistics-card {
+    background-color: #fdd96d;
+    padding: 20px;
+    border-radius: 10px;
+    max-width: 300px;
+    margin: 0 auto;
+    text-align: left;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
+  
+  .stat-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 0;
+    font-size: 18px;
+    font-weight: bold;
+    color: #333;
+  }
+  
+  .stat-row:not(:last-child) {
+    border-bottom: 1px solid #e6e6e6;
+  }
+  
