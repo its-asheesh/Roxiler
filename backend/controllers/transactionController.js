@@ -40,33 +40,56 @@ const fetchAndSeedData = async (req, res) => {
 const listTransactions = async (req, res) => {
   const { month, search = '', page = 1, perPage = 10 } = req.query;
 
+  // Check if month is valid
   if (!month || isNaN(month) || month < 1 || month > 12) {
     return res.status(400).json({ error: 'Invalid or missing month parameter' });
   }
 
-  const regex = new RegExp(search, 'i');
+  // Construct the date range for the given month
   const { startOfMonth, endOfMonth } = getMonthRange(month);
 
-  // Log the date range for debugging
+  // Log the start and end date for debugging purposes
   console.log('Start Date:', startOfMonth);
   console.log('End Date:', endOfMonth);
 
+  // Construct the search regex pattern if needed
+  const regex = search ? new RegExp(search, 'i') : null;
+
   try {
-    const transactions = await Transaction.find({
-      dateOfSale: { $gte: startOfMonth, $lte: endOfMonth },
-      $or: [{ title: regex }, { description: regex }],
-    })
+    // Build the query dynamically based on whether there's a search term
+    const query = {
+      dateOfSale: { $gte: startOfMonth, $lte: endOfMonth }
+    };
+
+    if (regex) {
+      query.$or = [
+        { title: regex },
+        { description: regex }
+      ];
+    }
+
+    // Fetch transactions based on the query, pagination, and limits
+    const transactions = await Transaction.find(query)
       .skip((page - 1) * perPage)
       .limit(perPage);
 
-    // Log the transactions returned for debugging
+    // Log the transactions returned for debugging purposes
     console.log('Transactions found:', transactions);
 
+    // Check if any transactions are found
+    if (transactions.length === 0) {
+      return res.status(404).json({ message: 'No transactions found matching the search term' });
+    }
+
+    // Return the fetched transactions
     res.status(200).json(transactions);
   } catch (error) {
+    // Handle any errors that occur during the query
+    console.error('Error fetching transactions:', error.message);
     res.status(500).json({ error: 'Error fetching transactions', details: error.message });
   }
 };
+
 
 // Get statistics
 const getStatistics = async (month, year = 2021) => {
