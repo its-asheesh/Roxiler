@@ -70,11 +70,11 @@ const PieChart = ({ selectedMonth }) => {
     <Box
       sx={{
         display: 'flex',
-        justifyContent: 'center',  // Horizontally center
-        alignItems: 'center',      // Vertically center
-        height: '100vh',           // Full screen height
-        flexDirection: 'column',   // Stack elements vertically
-        textAlign: 'center',       // Center text
+        justifyContent: 'center',
+        alignItems: 'center',
+        height: '100vh',
+        flexDirection: 'column',
+        textAlign: 'center',
       }}
     >
       <Typography variant="h5" gutterBottom>

@@ -1,14 +1,10 @@
 const axios = require('axios');
 const Transaction = require('../models/Transaction');
-const moment = require('moment'); // Optional but helpful for date management
+const moment = require('moment'); 
 
-// Helper: Get start and end dates for a month
 const getMonthRange = (month, year = 2022) => {
   const startOfMonth = moment(`${year}-${month}-01`).startOf('month').toDate();
   const endOfMonth = moment(`${year}-${month}-01`).endOf('month').toDate();
-  
-  console.log('Start of Month:', startOfMonth); // Log to verify
-  console.log('End of Month:', endOfMonth); // Log to verify
 
   return { startOfMonth, endOfMonth };
 };
@@ -52,13 +48,13 @@ const listTransactions = async (req, res) => {
   };
 
   if (search) {
-    const regex = new RegExp(search, 'i'); // For string fields
-    const parsedPrice = parseFloat(search); // Attempt to parse numeric value
+    const regex = new RegExp(search, 'i');
+    const parsedPrice = parseFloat(search);
 
     query.$or = [
       { title: regex },
       { description: regex },
-      ...(isNaN(parsedPrice) ? [] : [{ price: parsedPrice }]), // Only include price if search is a number
+      ...(isNaN(parsedPrice) ? [] : [{ price: parsedPrice }]),
     ];
   }
 

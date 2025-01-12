@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Bar } from 'react-chartjs-2';
 import { Chart as ChartJS } from 'chart.js/auto';
-import { CircularProgress, Box, Typography } from '@mui/material'; // Material UI components for better UI
+import { CircularProgress, Box, Typography } from '@mui/material';
 
 const BarChart = ({ selectedMonth, selectedYear }) => {
   const [barChartData, setBarChartData] = useState(null);
@@ -17,17 +17,17 @@ const BarChart = ({ selectedMonth, selectedYear }) => {
         });
 
         if (Array.isArray(res.data) && res.data.length > 0) {
-          const labels = res.data.map(item => item._id);  // Price range labels
-          const counts = res.data.map(item => item.count);  // Counts of items in each range
+          const labels = res.data.map(item => item._id);
+          const counts = res.data.map(item => item.count);
 
           const chartData = {
-            labels: labels, // Price range
+            labels: labels,
             datasets: [
               {
                 label: 'Items Sold in Price Range',
-                data: counts, // Item count for each price range
-                backgroundColor: 'rgba(54, 162, 235, 0.6)', // Blue
-                borderColor: 'rgba(54, 162, 235, 1)', // Blue border
+                data: counts,
+                backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                borderColor: 'rgba(54, 162, 235, 1)',
                 borderWidth: 1,
               },
             ],

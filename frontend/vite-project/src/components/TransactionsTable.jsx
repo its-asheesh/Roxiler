@@ -19,7 +19,7 @@ const TransactionsTable = ({ selectedMonth }) => {
   }, [selectedMonth, search, page, perPage]);
 
   const handleSearch = () => {
-    setIsSearchVisible(true); // Show the search input field
+    setIsSearchVisible(true);
   };
 
   const handleSearchSubmit = (e) => {
@@ -76,7 +76,7 @@ const TransactionsTable = ({ selectedMonth }) => {
           </thead>
           <tbody>
           {transactions.map((transaction) => {
-  console.log(transaction.image); // Debug image URL
+  console.log(transaction.image); 
   return (
     <tr key={transaction._id}>
       <td>{transaction._id}</td>
@@ -90,7 +90,7 @@ const TransactionsTable = ({ selectedMonth }) => {
           src={transaction.image}
           alt="transaction"
           className="transaction-image"
-          onError={(e) => (e.target.src = '/path/to/placeholder.png')} // Fallback if the image fails to load
+          onError={(e) => (e.target.src = '/path/to/placeholder.png')} 
         />
       </td>
     </tr>
